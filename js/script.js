@@ -96,9 +96,20 @@ function criarMatrizGradeHoraria(numLinhas) {
 function exibirGradeNoHTML(grade, containerId, matrizChoques) {
     const container = document.getElementById(containerId);
     if (container) {
+        container.innerHTML = '';
         const tabela = document.createElement('table');
         grade.forEach((linha, rowIndex) => {
             const linhaTabela = document.createElement('tr');
+            if (rowIndex > 0) {
+                linhaTabela.classList.add('data-row');
+                linhaTabela.addEventListener('mouseover', () => {
+                    linhaTabela.classList.add('highlight-row');
+                });
+                linhaTabela.addEventListener('mouseout', () => {
+                    linhaTabela.classList.remove('highlight-row');
+                });
+            }
+            
             linha.forEach((celula, cellIndex) => {
                 const celulaTabela = document.createElement(rowIndex === 0 ? 'th' : 'td');
                 celulaTabela.textContent = celula;
