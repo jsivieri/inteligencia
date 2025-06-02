@@ -117,7 +117,6 @@ th {
     background-color: #f2f2f2;
 }
 
-/* Estilos para os pares selecionados */
 .par-selecionado {
     background-color: white;
     padding: 15px;
@@ -146,3 +145,4 @@ th {
 .par-selecionado tr:nth-child(even) {
     background-color: #f2f2f2;
 }
+
