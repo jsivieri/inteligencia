@@ -244,7 +244,7 @@ function exibirResultadoTrocas(parOriginal, parModificado, intervalosTrocados, c
     divResultado.appendChild(titulo);
     const tabela = document.createElement('table');
     const cabecalho = document.createElement('tr');
-    ['', 'Original', 'Modificado'].forEach(texto => {
+    ['', 'Original', 'Mutação'].forEach(texto => {
         const th = document.createElement('th');
         th.textContent = texto;
         cabecalho.appendChild(th);
@@ -280,7 +280,7 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
     divOrdenacao.style.border = '1px solid #d0e0f0';
     
     const tituloOrdenacao = document.createElement('h2');
-    tituloOrdenacao.textContent = 'Linhas Ordenadas por Choques (Crescente)';
+    tituloOrdenacao.textContent = 'Ordenação por Choques após Mutação (Crescente)';
     divOrdenacao.appendChild(tituloOrdenacao);
     
     const tabelaOrdenacao = document.createElement('table');
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
         exibirContagemChoques(choquesPorLinhaOrdenados, 'choques-container');
         const numPares = Math.floor(numLinhas / 2);
         const tituloSelecao = document.createElement('h2');
-        tituloSelecao.textContent = `Seleção Aleatória de ${numPares} Pares de Linhas`;
+        tituloSelecao.textContent = `Seleção Aleatória de ${numPares} Pares`;
         selecaoContainer.appendChild(tituloSelecao);
         
         const todasLinhasModificadas = [];
