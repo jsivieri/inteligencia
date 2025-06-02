@@ -29,14 +29,13 @@ function criarMatrizGradeHoraria(numLinhas) {
     const numTotalHorarios = numPeriodos * horariosPorPeriodo;
     const gradeHoraria = [];
 
-        const linhaHorarios = Array.from({ length: numTotalHorarios }, (_, indice) => {
+    const linhaHorarios = Array.from({ length: numTotalHorarios }, (_, indice) => {
         const periodo = Math.floor(indice / horariosPorPeriodo) + 1;
         const horarioNoPeriodo = (indice % horariosPorPeriodo) + 1;
         return `P${periodo}-H${horarioNoPeriodo.toString().padStart(2, '0')}`;
     });
     gradeHoraria.push(linhaHorarios);
 
-    
     for (let i = 0; i < numLinhas; i++) {
         const linha = Array(numTotalHorarios).fill('');
         for (let j = 0; j < numTotalHorarios; j++) {
@@ -48,50 +47,49 @@ function criarMatrizGradeHoraria(numLinhas) {
 
     return gradeHoraria;
 }
-    function verificarChoquesHorario(grade) {
-        const numLinhas = grade.length;
-        const numHorariosPorPeriodo = 20;
-        const numPeriodos = 5;
-        const choquesPorLinha = Array(numLinhas - 1).fill(0);
-        const matrizChoques = [];
-        const diasDaSemana = [0, 1, 2, 3, 4]; 
-        const horariosDoDia = [0, 1, 2, 3];   
-    
-        for (let i = 1; i < numLinhas; i++) { 
-            const linhaChoques = Array(numHorariosPorPeriodo * numPeriodos).fill(false);
-            const professoresAlocadosPorDia = {}; 
-    
-            for (const dia of diasDaSemana) {
-                professoresAlocadosPorDia[dia] = {};
-                for (let periodo = 0; periodo < numPeriodos; periodo++) {
-                    for (let horarioIndex = 0; horarioIndex < horariosDoDia.length; horarioIndex++) {
-                        
-                        const coluna = periodo * numHorariosPorPeriodo + dia + horarioIndex * 5;
-    
-                        if (coluna < numHorariosPorPeriodo * numPeriodos) {
-                            const professorDisciplina = grade[i][coluna];
-                            if (professorDisciplina) {
-                                const professor = professorDisciplina.split('-')[0];
-                                const horarioDoDia = horariosDoDia[horarioIndex];
-    
-                                if (professoresAlocadosPorDia[dia][horarioDoDia]) {
-                                    if (professoresAlocadosPorDia[dia][horarioDoDia] === professor) {
-                                        linhaChoques[coluna] = true;
-                                        choquesPorLinha[i - 1]++;
-                                    }
-                                } else {
-                                    professoresAlocadosPorDia[dia][horarioDoDia] = professor;
+
+function verificarChoquesHorario(grade) {
+    const numLinhas = grade.length;
+    const numHorariosPorPeriodo = 20;
+    const numPeriodos = 5;
+    const choquesPorLinha = Array(numLinhas - 1).fill(0);
+    const matrizChoques = [];
+    const diasDaSemana = [0, 1, 2, 3, 4];
+    const horariosDoDia = [0, 1, 2, 3];
+
+    for (let i = 1; i < numLinhas; i++) {
+        const linhaChoques = Array(numHorariosPorPeriodo * numPeriodos).fill(false);
+        const professoresAlocadosPorDia = {};
+
+        for (const dia of diasDaSemana) {
+            professoresAlocadosPorDia[dia] = {};
+            for (let periodo = 0; periodo < numPeriodos; periodo++) {
+                for (let horarioIndex = 0; horarioIndex < horariosDoDia.length; horarioIndex++) {
+                    const coluna = periodo * numHorariosPorPeriodo + dia + horarioIndex * 5;
+
+                    if (coluna < numHorariosPorPeriodo * numPeriodos) {
+                        const professorDisciplina = grade[i][coluna];
+                        if (professorDisciplina) {
+                            const professor = professorDisciplina.split('-')[0];
+                            const horarioDoDia = horariosDoDia[horarioIndex];
+
+                            if (professoresAlocadosPorDia[dia][horarioDoDia]) {
+                                if (professoresAlocadosPorDia[dia][horarioDoDia] === professor) {
+                                    linhaChoques[coluna] = true;
+                                    choquesPorLinha[i - 1]++;
                                 }
+                            } else {
+                                professoresAlocadosPorDia[dia][horarioDoDia] = professor;
                             }
                         }
                     }
                 }
             }
-            matrizChoques.push(linhaChoques);
         }
-        return { choquesPorLinha, matrizChoques };
+        matrizChoques.push(linhaChoques);
     }
-
+    return { choquesPorLinha, matrizChoques };
+}
 
 function exibirGradeNoHTML(grade, containerId, matrizChoques) {
     const container = document.getElementById(containerId);
@@ -109,7 +107,7 @@ function exibirGradeNoHTML(grade, containerId, matrizChoques) {
                     linhaTabela.classList.remove('highlight-row');
                 });
             }
-            
+
             linha.forEach((celula, cellIndex) => {
                 const celulaTabela = document.createElement(rowIndex === 0 ? 'th' : 'td');
                 celulaTabela.textContent = celula;
@@ -147,29 +145,21 @@ function exibirContagemChoques(contagemChoques, containerId) {
 }
 
 function ordenarLinhasPorChoques(grade) {
-    
     const { choquesPorLinha, matrizChoques } = verificarChoquesHorario(grade);
-    
-    
     const cabecalho = grade[0];
     const linhasDados = grade.slice(1);
-    
-    
+
     const linhasComChoques = linhasDados.map((linha, index) => ({
         linha,
         choques: choquesPorLinha[index],
         choquesDetalhados: matrizChoques[index]
     }));
-    
-    
+
     linhasComChoques.sort((a, b) => a.choques - b.choques);
-    
-    
+
     const gradeOrdenada = [cabecalho, ...linhasComChoques.map(item => item.linha)];
-    
-    
     const matrizChoquesOrdenada = linhasComChoques.map(item => item.choquesDetalhados);
-    
+
     return {
         gradeOrdenada,
         choquesPorLinhaOrdenados: linhasComChoques.map(item => item.choques),
@@ -177,17 +167,13 @@ function ordenarLinhasPorChoques(grade) {
     };
 }
 
-
 function selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados) {
-    const numLinhas = gradeOrdenada.length - 1; 
+    const numLinhas = gradeOrdenada.length - 1;
     const primeiraMetade = Math.floor(numLinhas * 0.5);
-    
-    
+
     const primeiraLinhaIndex = Math.floor(Math.random() * primeiraMetade) + 1;
-    
-    
     const segundaLinhaIndex = Math.floor(Math.random() * numLinhas) + 1;
-    
+
     return {
         primeiraLinha: gradeOrdenada[primeiraLinhaIndex],
         primeiraLinhaIndex,
@@ -209,10 +195,10 @@ function criarMatrizSelecao(linhasSelecionadas) {
 function exibirSelecaoNoHTML(matrizSelecao, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    
-    container.innerHTML = '<h2>Seleção Aleatória</h2>';
+
+    container.innerHTML = '';
     const tabela = document.createElement('table');
-    
+
     matrizSelecao.forEach((linha, rowIndex) => {
         const tr = document.createElement('tr');
         linha.forEach((celula, cellIndex) => {
@@ -223,7 +209,7 @@ function exibirSelecaoNoHTML(matrizSelecao, containerId) {
         });
         tabela.appendChild(tr);
     });
-    
+
     container.appendChild(tabela);
 }
 
@@ -237,25 +223,43 @@ function criarContainerSelecao() {
     return container;
 }
 
-
+// Execução principal
 const numLinhas = parseInt(prompt("Informe quantas linhas a grade horária terá:"));
 
-
-
-
 if (!isNaN(numLinhas) && numLinhas > 0) {
-    
     const minhaGrade = criarMatrizGradeHoraria(numLinhas);
     const { gradeOrdenada, choquesPorLinhaOrdenados, matrizChoquesOrdenada } = ordenarLinhasPorChoques(minhaGrade);
-    
+
     exibirGradeNoHTML(gradeOrdenada, 'grade-container', matrizChoquesOrdenada);
     exibirContagemChoques(choquesPorLinhaOrdenados, 'choques-container');
-    
-    
+
     criarContainerSelecao();
+
+    // Calcular quantos pares vamos mostrar (n/2)
+    const numPares = Math.floor(numLinhas / 2);
+    const containerSelecao = document.getElementById('selecao-container');
     
-    
-    const linhasSelecionadas = selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados);
-    const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
-    exibirSelecaoNoHTML(matrizSelecao, 'selecao-container');
+    // Criar um título para a seção de seleção
+    const tituloSelecao = document.createElement('h2');
+    tituloSelecao.textContent = `Seleção Aleatória de ${numPares} Pares de Linhas`;
+    containerSelecao.appendChild(tituloSelecao);
+
+    // Gerar e exibir cada par de linhas
+    for (let i = 0; i < numPares; i++) {
+        const linhasSelecionadas = selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados);
+        const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
+        
+        // Adicionar um subtítulo para cada par
+        const subtitulo = document.createElement('h3');
+        subtitulo.textContent = `Par ${i + 1}`;
+        containerSelecao.appendChild(subtitulo);
+        
+        // Criar uma div para cada tabela de par
+        const divPar = document.createElement('div');
+        divPar.className = 'par-selecionado';
+        divPar.style.marginBottom = '30px';
+        containerSelecao.appendChild(divPar);
+        
+        exibirSelecaoNoHTML(matrizSelecao, divPar.id = `par-${i}`);
+    }
 }

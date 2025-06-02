@@ -116,3 +116,33 @@ th {
 #choques-container tr:nth-child(even) {
     background-color: #f2f2f2;
 }
+
+/* Estilos para os pares selecionados */
+.par-selecionado {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.par-selecionado h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.par-selecionado table {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.par-selecionado th {
+    background-color: #34495e;
+    color: white;
+}
+
+.par-selecionado tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
