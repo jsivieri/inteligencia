@@ -18,7 +18,6 @@ for (const disciplina of disciplinas) {
     const constanteNome = `${professor.toLowerCase()}_${disciplina}`;
     const valorConcatenado = `${professor}-${disciplina}`;
     constantesGeradas[constanteNome] = valorConcatenado;
-
     professorDisciplinaMap[professor] = professorDisciplinaMap[professor] || [];
     professorDisciplinaMap[professor].push(disciplina);
 }
@@ -28,7 +27,6 @@ function criarMatrizGradeHoraria(numLinhas) {
     const horariosPorPeriodo = 20;
     const numTotalHorarios = numPeriodos * horariosPorPeriodo;
     const gradeHoraria = [];
-
     const linhaHorarios = Array.from({ length: numTotalHorarios }, (_, indice) => {
         const periodo = Math.floor(indice / horariosPorPeriodo) + 1;
         const horarioNoPeriodo = (indice % horariosPorPeriodo) + 1;
@@ -44,7 +42,6 @@ function criarMatrizGradeHoraria(numLinhas) {
         }
         gradeHoraria.push(linha);
     }
-
     return gradeHoraria;
 }
 
@@ -66,13 +63,11 @@ function verificarChoquesHorario(grade) {
             for (let periodo = 0; periodo < numPeriodos; periodo++) {
                 for (let horarioIndex = 0; horarioIndex < horariosDoDia.length; horarioIndex++) {
                     const coluna = periodo * numHorariosPorPeriodo + dia + horarioIndex * 5;
-
                     if (coluna < numHorariosPorPeriodo * numPeriodos) {
                         const professorDisciplina = grade[i][coluna];
                         if (professorDisciplina) {
                             const professor = professorDisciplina.split('-')[0];
                             const horarioDoDia = horariosDoDia[horarioIndex];
-
                             if (professoresAlocadosPorDia[dia][horarioDoDia]) {
                                 if (professoresAlocadosPorDia[dia][horarioDoDia] === professor) {
                                     linhaChoques[coluna] = true;
@@ -107,25 +102,20 @@ function exibirGradeNoHTML(grade, containerId, matrizChoques) {
                     linhaTabela.classList.remove('highlight-row');
                 });
             }
-
             linha.forEach((celula, cellIndex) => {
                 const celulaTabela = document.createElement(rowIndex === 0 ? 'th' : 'td');
                 celulaTabela.textContent = celula;
-
                 if (rowIndex === 0) {
                     const periodo = Math.floor(cellIndex / 20) + 1;
                     celulaTabela.classList.add(`periodo-${periodo}`);
                 } else if (matrizChoques && matrizChoques[rowIndex - 1] && matrizChoques[rowIndex - 1][cellIndex]) {
                     celulaTabela.classList.add('choque');
                 }
-
                 linhaTabela.appendChild(celulaTabela);
             });
             tabela.appendChild(linhaTabela);
         });
         container.appendChild(tabela);
-    } else {
-        console.error(`Elemento com ID "${containerId}" não encontrado no HTML.`);
     }
 }
 
@@ -139,8 +129,6 @@ function exibirContagemChoques(contagemChoques, containerId) {
             listaChoques.appendChild(itemLista);
         });
         container.appendChild(listaChoques);
-    } else {
-        console.error(`Elemento com ID "${containerId}" não encontrado no HTML.`);
     }
 }
 
@@ -148,18 +136,14 @@ function ordenarLinhasPorChoques(grade) {
     const { choquesPorLinha, matrizChoques } = verificarChoquesHorario(grade);
     const cabecalho = grade[0];
     const linhasDados = grade.slice(1);
-
     const linhasComChoques = linhasDados.map((linha, index) => ({
         linha,
         choques: choquesPorLinha[index],
         choquesDetalhados: matrizChoques[index]
     }));
-
     linhasComChoques.sort((a, b) => a.choques - b.choques);
-
     const gradeOrdenada = [cabecalho, ...linhasComChoques.map(item => item.linha)];
     const matrizChoquesOrdenada = linhasComChoques.map(item => item.choquesDetalhados);
-
     return {
         gradeOrdenada,
         choquesPorLinhaOrdenados: linhasComChoques.map(item => item.choques),
@@ -170,10 +154,8 @@ function ordenarLinhasPorChoques(grade) {
 function selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados) {
     const numLinhas = gradeOrdenada.length - 1;
     const primeiraMetade = Math.floor(numLinhas * 0.5);
-
     const primeiraLinhaIndex = Math.floor(Math.random() * primeiraMetade) + 1;
     const segundaLinhaIndex = Math.floor(Math.random() * numLinhas) + 1;
-
     return {
         primeiraLinha: gradeOrdenada[primeiraLinhaIndex],
         primeiraLinhaIndex,
@@ -195,10 +177,8 @@ function criarMatrizSelecao(linhasSelecionadas) {
 function exibirSelecaoNoHTML(matrizSelecao, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     container.innerHTML = '';
     const tabela = document.createElement('table');
-
     matrizSelecao.forEach((linha, rowIndex) => {
         const tr = document.createElement('tr');
         linha.forEach((celula, cellIndex) => {
@@ -209,7 +189,6 @@ function exibirSelecaoNoHTML(matrizSelecao, containerId) {
         });
         tabela.appendChild(tr);
     });
-
     container.appendChild(tabela);
 }
 
@@ -226,10 +205,8 @@ function dividirEmIntervalos(linha) {
 function trocarIntervalos(linha1, linha2, intervalosParaTrocar) {
     const intervalos1 = dividirEmIntervalos(linha1);
     const intervalos2 = dividirEmIntervalos(linha2);
-    
     const novaLinha1 = [];
     const novaLinha2 = [];
-    
     for (let i = 0; i < 4; i++) {
         if (intervalosParaTrocar.includes(i)) {
             novaLinha1.push(...intervalos2[i]);
@@ -239,23 +216,19 @@ function trocarIntervalos(linha1, linha2, intervalosParaTrocar) {
             novaLinha2.push(...intervalos2[i]);
         }
     }
-    
     return { novaLinha1, novaLinha2 };
 }
 
 function criarNovasLinhasComTrocas(primeiraLinha, segundaLinha) {
     const numIntervalosParaTrocar = Math.floor(Math.random() * 3) + 1;
     const intervalosParaTrocar = [];
-    
     while (intervalosParaTrocar.length < numIntervalosParaTrocar) {
         const intervalo = Math.floor(Math.random() * 4);
         if (!intervalosParaTrocar.includes(intervalo)) {
             intervalosParaTrocar.push(intervalo);
         }
     }
-    
     const { novaLinha1, novaLinha2 } = trocarIntervalos(primeiraLinha, segundaLinha, intervalosParaTrocar);
-    
     return {
         novaLinha1,
         novaLinha2,
@@ -266,13 +239,10 @@ function criarNovasLinhasComTrocas(primeiraLinha, segundaLinha) {
 function exibirResultadoTrocas(parOriginal, parModificado, intervalosTrocados, container) {
     const divResultado = document.createElement('div');
     divResultado.className = 'resultado-trocas';
-    
     const titulo = document.createElement('h4');
     titulo.textContent = `Trocas realizadas nos intervalos: ${intervalosTrocados}`;
     divResultado.appendChild(titulo);
-    
     const tabela = document.createElement('table');
-    
     const cabecalho = document.createElement('tr');
     ['', 'Original', 'Modificado'].forEach(texto => {
         const th = document.createElement('th');
@@ -280,97 +250,119 @@ function exibirResultadoTrocas(parOriginal, parModificado, intervalosTrocados, c
         cabecalho.appendChild(th);
     });
     tabela.appendChild(cabecalho);
-    
     ['Primeira Linha', 'Segunda Linha'].forEach((label, i) => {
         const tr = document.createElement('tr');
-        
         const tdLabel = document.createElement('td');
         tdLabel.textContent = label;
         tr.appendChild(tdLabel);
-        
         const tdOriginal = document.createElement('td');
-        tdOriginal.textContent = i === 0 ? 
-            `Choques: ${parOriginal.choquesPrimeira}` : 
-            `Choques: ${parOriginal.choquesSegunda}`;
+        tdOriginal.textContent = i === 0 ? `Choques: ${parOriginal.choquesPrimeira}` : `Choques: ${parOriginal.choquesSegunda}`;
         tr.appendChild(tdOriginal);
-        
         const tdModificado = document.createElement('td');
-        tdModificado.textContent = i === 0 ? 
-            `Choques: ${parModificado.choquesPrimeira}` : 
-            `Choques: ${parModificado.choquesSegunda}`;
+        tdModificado.textContent = i === 0 ? `Choques: ${parModificado.choquesPrimeira}` : `Choques: ${parModificado.choquesSegunda}`;
         tr.appendChild(tdModificado);
-        
         tabela.appendChild(tr);
     });
-    
     divResultado.appendChild(tabela);
     container.appendChild(divResultado);
 }
 
-// EXECUÇÃO PRINCIPAL MODIFICADA
+function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const divOrdenacao = document.createElement('div');
+    divOrdenacao.className = 'resultado-ordenacao';
+    divOrdenacao.style.marginTop = '30px';
+    divOrdenacao.style.padding = '15px';
+    divOrdenacao.style.backgroundColor = '#f0f8ff';
+    divOrdenacao.style.borderRadius = '5px';
+    divOrdenacao.style.border = '1px solid #d0e0f0';
+    
+    const tituloOrdenacao = document.createElement('h2');
+    tituloOrdenacao.textContent = 'Linhas Ordenadas por Choques (Crescente)';
+    divOrdenacao.appendChild(tituloOrdenacao);
+    
+    const tabelaOrdenacao = document.createElement('table');
+    tabelaOrdenacao.style.width = '100%';
+    
+    const cabecalhoOrdenacao = document.createElement('tr');
+    ['Posição', 'Linha', 'Choques', 'Valores'].forEach(texto => {
+        const th = document.createElement('th');
+        th.textContent = texto;
+        cabecalhoOrdenacao.appendChild(th);
+    });
+    tabelaOrdenacao.appendChild(cabecalhoOrdenacao);
+    
+    linhasOrdenadas.forEach((linha, index) => {
+        const tr = document.createElement('tr');
+        [`${index + 1}º`, linha.linhaIndex, linha.choques, linha.valores.substring(0, 80) + '...'].forEach(texto => {
+            const td = document.createElement('td');
+            td.textContent = texto;
+            tr.appendChild(td);
+        });
+        tabelaOrdenacao.appendChild(tr);
+    });
+    
+    divOrdenacao.appendChild(tabelaOrdenacao);
+    container.appendChild(divOrdenacao);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Esconder containers inicialmente
     document.getElementById('grade-container').style.display = 'none';
     document.getElementById('choques-container').style.display = 'none';
-    
-    // Criar container de seleção dinamicamente
     const selecaoContainer = document.createElement('div');
     selecaoContainer.id = 'selecao-container';
     selecaoContainer.style.display = 'none';
     document.querySelector('.container').appendChild(selecaoContainer);
-    
-    // Solicitar número de linhas
     const numLinhas = parseInt(prompt("Informe quantas linhas a grade horária terá:"));
     
     if (!isNaN(numLinhas) && numLinhas > 0) {
-        // Mostrar containers
         document.getElementById('grade-container').style.display = 'block';
         document.getElementById('choques-container').style.display = 'block';
         selecaoContainer.style.display = 'block';
-        
-        // Processar grade horária
         const minhaGrade = criarMatrizGradeHoraria(numLinhas);
         const { gradeOrdenada, choquesPorLinhaOrdenados, matrizChoquesOrdenada } = ordenarLinhasPorChoques(minhaGrade);
-
         exibirGradeNoHTML(gradeOrdenada, 'grade-container', matrizChoquesOrdenada);
         exibirContagemChoques(choquesPorLinhaOrdenados, 'choques-container');
-
-        // Processar pares de linhas
         const numPares = Math.floor(numLinhas / 2);
         const tituloSelecao = document.createElement('h2');
         tituloSelecao.textContent = `Seleção Aleatória de ${numPares} Pares de Linhas`;
         selecaoContainer.appendChild(tituloSelecao);
-
+        
+        const todasLinhasModificadas = [];
+        
         for (let i = 0; i < numPares; i++) {
             const linhasSelecionadas = selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados);
             const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
-            
             const subtitulo = document.createElement('h3');
             subtitulo.textContent = `Par ${i + 1}`;
             selecaoContainer.appendChild(subtitulo);
-            
             const divPar = document.createElement('div');
             divPar.className = 'par-selecionado';
             selecaoContainer.appendChild(divPar);
-            
             exibirSelecaoNoHTML(matrizSelecao, divPar.id = `par-${i}`);
-            
-            // Processar trocas de intervalos
             const { primeiraLinha, segundaLinha } = linhasSelecionadas;
             const { novaLinha1, novaLinha2, intervalosTrocados } = criarNovasLinhasComTrocas(primeiraLinha, segundaLinha);
-            
             const gradeTemp = [gradeOrdenada[0], novaLinha1, novaLinha2];
             const { choquesPorLinha } = verificarChoquesHorario(gradeTemp);
-            
             const parModificado = {
                 primeiraLinha: novaLinha1,
                 segundaLinha: novaLinha2,
                 choquesPrimeira: choquesPorLinha[0],
                 choquesSegunda: choquesPorLinha[1]
             };
-            
             exibirResultadoTrocas(linhasSelecionadas, parModificado, intervalosTrocados, divPar);
+            
+            todasLinhasModificadas.push(
+                { linha: novaLinha1, choques: choquesPorLinha[0], linhaIndex: `Par ${i+1} - Linha 1`, valores: novaLinha1.join(', ') },
+                { linha: novaLinha2, choques: choquesPorLinha[1], linhaIndex: `Par ${i+1} - Linha 2`, valores: novaLinha2.join(', ') }
+            );
         }
+        
+        todasLinhasModificadas.sort((a, b) => a.choques - b.choques);
+        exibirOrdenacaoFinal(todasLinhasModificadas, 'selecao-container');
+        
     } else {
         alert('Por favor, insira um número válido de linhas.');
         location.reload();
