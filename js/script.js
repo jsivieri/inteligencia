@@ -110,6 +110,7 @@ function exibirGradeNoHTML(grade, containerId, matrizChoques) {
                     celulaTabela.classList.add(`periodo-${periodo}`);
                 } else if (matrizChoques && matrizChoques[rowIndex - 1] && matrizChoques[rowIndex - 1][cellIndex]) {
                     celulaTabela.classList.add('choque');
+                    celulaTabela.style.background = '#ffcccc';
                 }
                 linhaTabela.appendChild(celulaTabela);
             });
@@ -268,6 +269,7 @@ function exibirResultadoTrocas(parOriginal, parModificado, intervalosTrocados, c
 }
 
 function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
+    window.ultimaOrdenacaoLinhas = linhasOrdenadas;
     const container = document.getElementById(containerId);
     if (!container) return;
     
@@ -296,8 +298,9 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
     
     linhasOrdenadas.forEach((linha, index) => {
         const tr = document.createElement('tr');
-        [`${index + 1}º`, linha.linhaIndex, linha.choques, linha.valores.substring(0, 80) + '...'].forEach(texto => {
+        [`${index + 1}º`, linha.linhaIndex, linha.choques, linha.valores.substring(0, 80) + '...'].forEach((texto, i) => {
             const td = document.createElement('td');
+            if (i === 3) td.setAttribute('data-valores', linha.valores); // Salva todos os valores
             td.textContent = texto;
             tr.appendChild(td);
         });
@@ -308,9 +311,100 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
     container.appendChild(divOrdenacao);
 }
 
+// Função para rolar até o elemento alvo
+function scrollToSection(selector) {
+    const el = document.querySelector(selector);
+    if (el) {
+        // Compensa altura do botão fixo (ex: 80px)
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+}
+
+// Adiciona IDs para navegação se não existirem
+function ensureSectionIds() {
+    const grade = document.getElementById('grade-container');
+    if (grade && !grade.id.includes('section')) grade.setAttribute('data-section', 'grade');
+    grade.parentElement.id = 'section-grade';
+    
+    const choques = document.getElementById('choques-container');
+    if (choques && !choques.id.includes('section')) choques.setAttribute('data-section', 'choques');
+    choques.parentElement.id = 'section-choques';
+
+    // Cria containers para as outras seções se não existirem
+    let ordenacao = document.getElementById('section-ordenacao');
+    if (!ordenacao) {
+        ordenacao = document.createElement('div');
+        ordenacao.id = 'section-ordenacao';
+        ordenacao.style.minHeight = '40px';
+        document.querySelector('.container').appendChild(ordenacao);
+    }
+    let selecao = document.getElementById('section-selecao');
+    if (!selecao) {
+        selecao = document.createElement('div');
+        selecao.id = 'section-selecao';
+        selecao.style.minHeight = '40px';
+        document.querySelector('.container').appendChild(selecao);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    ensureSectionIds();
+    // Corrige para rolar até o topo do container correto
+    document.querySelector('.btn-grade').onclick = () => scrollToSection('#grade-container');
+    document.querySelector('.btn-choques').onclick = () => scrollToSection('#choques-container');
+    document.querySelector('.btn-ordenacao').onclick = () => scrollToSection('#section-ordenacao');
+    document.querySelector('.btn-selecao').onclick = () => scrollToSection('#section-selecao');
+});
+
+// Botão especial fixo no canto superior direito
+const btnEspecial = document.createElement('button');
+btnEspecial.id = 'btn-especial-fixo';
+btnEspecial.title = 'Botão Especial';
+btnEspecial.innerHTML = 'GERAR GRADE HORÁRIA';
+document.body.appendChild(btnEspecial);
+
+// Função para garantir que os títulos de ordenação e seleção sejam criados após o conteúdo dinâmico
+function garantirTitulosDinamicos() {
+    // ORDENAÇÃO
+    let ordenacaoDiv = document.getElementById('section-ordenacao');
+    if (ordenacaoDiv && !ordenacaoDiv.querySelector('h2')) {
+        let h2Ordenacao = document.createElement('h2');
+        h2Ordenacao.textContent = 'ORDENAÇÃO POR CHOQUES APOS MUTAÇÃO';
+        h2Ordenacao.id = 'titulo-ordenacao';
+        ordenacaoDiv.prepend(h2Ordenacao);
+    }
+    // SELEÇÃO
+    let selecaoDiv = document.getElementById('section-selecao');
+    if (selecaoDiv && !selecaoDiv.querySelector('h2')) {
+        let h2Selecao = document.createElement('h2');
+        h2Selecao.textContent = 'SELEÇÃO ALEATÓRIA DE 5 PARES';
+        h2Selecao.id = 'titulo-selecao';
+        selecaoDiv.prepend(h2Selecao);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('grade-container').style.display = 'none';
     document.getElementById('choques-container').style.display = 'none';
+    // Garante que os containers de ordenação e seleção existam
+    let ordenacaoDiv = document.getElementById('section-ordenacao');
+    if (!ordenacaoDiv) {
+        ordenacaoDiv = document.createElement('div');
+        ordenacaoDiv.id = 'section-ordenacao';
+        ordenacaoDiv.style.minHeight = '40px';
+        document.querySelector('.container').appendChild(ordenacaoDiv);
+    }
+    let selecaoDiv = document.getElementById('section-selecao');
+    if (!selecaoDiv) {
+        selecaoDiv = document.createElement('div');
+        selecaoDiv.id = 'section-selecao';
+        selecaoDiv.style.minHeight = '40px';
+        document.querySelector('.container').appendChild(selecaoDiv);
+    }
+    ordenacaoDiv.innerHTML = '';
+    selecaoDiv.innerHTML = '';
+
     const selecaoContainer = document.createElement('div');
     selecaoContainer.id = 'selecao-container';
     selecaoContainer.style.display = 'none';
@@ -325,46 +419,192 @@ document.addEventListener('DOMContentLoaded', function() {
         const { gradeOrdenada, choquesPorLinhaOrdenados, matrizChoquesOrdenada } = ordenarLinhasPorChoques(minhaGrade);
         exibirGradeNoHTML(gradeOrdenada, 'grade-container', matrizChoquesOrdenada);
         exibirContagemChoques(choquesPorLinhaOrdenados, 'choques-container');
-        const numPares = Math.floor(numLinhas / 2);
-        const tituloSelecao = document.createElement('h2');
-        tituloSelecao.textContent = `Seleção Aleatória de ${numPares} Pares`;
-        selecaoContainer.appendChild(tituloSelecao);
-        
-        const todasLinhasModificadas = [];
-        
-        for (let i = 0; i < numPares; i++) {
-            const linhasSelecionadas = selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados);
-            const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
-            const subtitulo = document.createElement('h3');
-            subtitulo.textContent = `Par ${i + 1}`;
-            selecaoContainer.appendChild(subtitulo);
-            const divPar = document.createElement('div');
-            divPar.className = 'par-selecionado';
-            selecaoContainer.appendChild(divPar);
-            exibirSelecaoNoHTML(matrizSelecao, divPar.id = `par-${i}`);
-            const { primeiraLinha, segundaLinha } = linhasSelecionadas;
-            const { novaLinha1, novaLinha2, intervalosTrocados } = criarNovasLinhasComTrocas(primeiraLinha, segundaLinha);
-            const gradeTemp = [gradeOrdenada[0], novaLinha1, novaLinha2];
-            const { choquesPorLinha } = verificarChoquesHorario(gradeTemp);
-            const parModificado = {
-                primeiraLinha: novaLinha1,
-                segundaLinha: novaLinha2,
-                choquesPrimeira: choquesPorLinha[0],
-                choquesSegunda: choquesPorLinha[1]
-            };
-            exibirResultadoTrocas(linhasSelecionadas, parModificado, intervalosTrocados, divPar);
-            
-            todasLinhasModificadas.push(
-                { linha: novaLinha1, choques: choquesPorLinha[0], linhaIndex: `Par ${i+1} - Linha 1`, valores: novaLinha1.join(', ') },
-                { linha: novaLinha2, choques: choquesPorLinha[1], linhaIndex: `Par ${i+1} - Linha 2`, valores: novaLinha2.join(', ') }
-            );
+        // ORDENAÇÃO POR CHOQUES APOS MUTAÇÃO
+        if (ordenacaoDiv) {
+            ordenacaoDiv.innerHTML = '';
+            // Exibe a ordenação das linhas originais (sem mutação)
+            const { gradeOrdenada, choquesPorLinhaOrdenados } = ordenarLinhasPorChoques(minhaGrade);
+            const linhasOrdenadas = gradeOrdenada.slice(1).map((linha, idx) => ({
+                linha,
+                linhaIndex: idx + 1,
+                choques: choquesPorLinhaOrdenados[idx],
+                valores: linha.join(', ')
+            }));
+            linhasOrdenadas.sort((a, b) => a.choques - b.choques);
+            exibirOrdenacaoFinal(linhasOrdenadas, 'section-ordenacao');
         }
-        
-        todasLinhasModificadas.sort((a, b) => a.choques - b.choques);
-        exibirOrdenacaoFinal(todasLinhasModificadas, 'selecao-container');
-        
+        // SELEÇÃO ALEATÓRIA DE 5 PARES
+        if (selecaoDiv) {
+            selecaoDiv.innerHTML = '';
+            const numPares = 5;
+            const tituloSelecao = document.createElement('h2');
+            tituloSelecao.textContent = 'SELEÇÃO ALEATÓRIA DE 5 PARES';
+            tituloSelecao.id = 'titulo-selecao';
+            selecaoDiv.appendChild(tituloSelecao);
+            for (let i = 0; i < numPares; i++) {
+                const linhasSelecionadas = selecionarLinhasAleatorias(minhaGrade, ordenarLinhasPorChoques(minhaGrade).choquesPorLinhaOrdenados);
+                const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
+                const subtitulo = document.createElement('h3');
+                subtitulo.textContent = `Par ${i + 1}`;
+                selecaoDiv.appendChild(subtitulo);
+                const divPar = document.createElement('div');
+                divPar.className = 'par-selecionado';
+                selecaoDiv.appendChild(divPar);
+                exibirSelecaoNoHTML(matrizSelecao, divPar.id = `par-${i}`);
+                const { primeiraLinha, segundaLinha } = linhasSelecionadas;
+                const { novaLinha1, novaLinha2, intervalosTrocados } = criarNovasLinhasComTrocas(primeiraLinha, segundaLinha);
+                const gradeTemp = [minhaGrade[0], novaLinha1, novaLinha2];
+                const { choquesPorLinha } = verificarChoquesHorario(gradeTemp);
+                const parModificado = {
+                    primeiraLinha: novaLinha1,
+                    segundaLinha: novaLinha2,
+                    choquesPrimeira: choquesPorLinha[0],
+                    choquesSegunda: choquesPorLinha[1]
+                };
+                exibirResultadoTrocas(linhasSelecionadas, parModificado, intervalosTrocados, divPar);
+            }
+        }
     } else {
         alert('Por favor, insira um número válido de linhas.');
         location.reload();
     }
 });
+
+// Evento do botão especial
+btnEspecial.onclick = function() {
+    // Busca a primeira colocação da ordenação de forma robusta
+    let primeiraLinha = null;
+    let choquesArray = [];
+    let choques = 0;
+    // Procura na última ordenacao exibida
+    if (window.ultimaOrdenacaoLinhas && window.ultimaOrdenacaoLinhas[0]) {
+        primeiraLinha = window.ultimaOrdenacaoLinhas[0].linha;
+        choquesArray = window.ultimaOrdenacaoLinhas[0].choquesDetalhados || [];
+        choques = window.ultimaOrdenacaoLinhas[0].choques || 0;
+    } else {
+        const ordenacaoDiv = document.getElementById('section-ordenacao');
+        if (ordenacaoDiv) {
+            const tabelas = ordenacaoDiv.getElementsByTagName('table');
+            if (tabelas.length > 0) {
+                const tr = tabelas[0].querySelectorAll('tr')[1];
+                if (tr) {
+                    const tds = tr.querySelectorAll('td');
+                    if (tds.length > 3) {
+                        let valores = tds[3].getAttribute('data-valores') || tds[3].textContent;
+                        valores = valores.replace('...', '').split(',');
+                        primeiraLinha = valores.map(v => v.trim());
+                    }
+                }
+            }
+        }
+    }
+    if (primeiraLinha && primeiraLinha.length >= 20) {
+        exibirHorarioPrimeiroOrdenado(primeiraLinha, choquesArray, choques);
+    } else {
+        alert('Não foi possível encontrar a primeira colocação da ordenação. Gere a grade primeiro!');
+    }
+};
+
+// Função para criar e exibir o horário da primeira colocação
+function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
+    // Remove modal antigo se existir
+    const antigo = document.getElementById('modal-horario-especial');
+    if (antigo) antigo.remove();
+
+    // Cria overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'modal-horario-especial';
+    overlay.style.position = 'fixed';
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = 3000;
+
+    // Modal box
+    const box = document.createElement('div');
+    box.style.background = '#fff';
+    box.style.borderRadius = '16px';
+    box.style.padding = '32px 24px 24px 24px';
+    box.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
+    box.style.minWidth = '340px';
+    box.style.maxWidth = '90vw';
+    box.style.maxHeight = '90vh';
+    box.style.overflow = 'auto';
+
+    // Título
+    const titulo = document.createElement('h2');
+    titulo.textContent = `Horário - tivemos ${choques} choques`;
+    titulo.style.textAlign = 'center';
+    box.appendChild(titulo);
+
+    // Tabela de horários
+    const tabela = document.createElement('table');
+    tabela.style.margin = '0 auto';
+    tabela.style.borderCollapse = 'collapse';
+    tabela.style.fontSize = '1em';
+    tabela.style.background = '#f8f9fa';
+    tabela.style.borderRadius = '8px';
+    tabela.style.overflow = 'hidden';
+
+    // Cabeçalho
+    const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    const thead = document.createElement('thead');
+    const trHead = document.createElement('tr');
+    trHead.appendChild(document.createElement('th'));
+    dias.forEach(dia => {
+        const th = document.createElement('th');
+        th.textContent = dia;
+        th.style.padding = '8px 16px';
+        th.style.background = '#34495e';
+        th.style.color = '#fff';
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    tabela.appendChild(thead);
+
+    // Corpo: 4 horários por dia (linhas)
+    for (let h = 0; h < 4; h++) {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = `Horário ${h+1}`;
+        th.style.background = '#eaeaea';
+        tr.appendChild(th);
+        for (let d = 0; d < 5; d++) {
+            const td = document.createElement('td');
+            const idx = d + h*5;
+            td.textContent = linha[idx] || '-';
+            td.style.padding = '8px 12px';
+            td.style.border = '1px solid #ddd';
+            // Destaca em vermelho claro se houver choque
+            if (choquesArray && choquesArray[idx]) {
+                td.style.background = '#ffcccc';
+            }
+            tr.appendChild(td);
+        }
+        tabela.appendChild(tr);
+    }
+    box.appendChild(tabela);
+
+    // Botão fechar
+    const btnFechar = document.createElement('button');
+    btnFechar.textContent = 'Fechar';
+    btnFechar.style.margin = '24px auto 0 auto';
+    btnFechar.style.display = 'block';
+    btnFechar.style.background = '#ff6b6b';
+    btnFechar.style.color = '#fff';
+    btnFechar.style.border = 'none';
+    btnFechar.style.borderRadius = '24px';
+    btnFechar.style.padding = '10px 32px';
+    btnFechar.style.fontSize = '1.1em';
+    btnFechar.style.cursor = 'pointer';
+    btnFechar.onclick = () => overlay.remove();
+    box.appendChild(btnFechar);
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+}
