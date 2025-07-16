@@ -126,7 +126,7 @@ function exibirContagemChoques(contagemChoques, containerId) {
         const listaChoques = document.createElement('ul');
         contagemChoques.forEach((contagem, index) => {
             const itemLista = document.createElement('li');
-            itemLista.textContent = `Linha ${index + 1}: ${contagem} `;
+            itemLista.textContent = `Época ${index + 1}: ${contagem} `;
             listaChoques.appendChild(itemLista);
         });
         container.appendChild(listaChoques);
@@ -169,7 +169,7 @@ function selecionarLinhasAleatorias(gradeOrdenada, choquesPorLinhaOrdenados) {
 
 function criarMatrizSelecao(linhasSelecionadas) {
     return [
-        ["Seleção", "Linha", "Choques", "Valores"],
+        ["Seleção", "Época", "Choques", "Valores"],
         ["Primeira", linhasSelecionadas.primeiraLinhaIndex, linhasSelecionadas.choquesPrimeira, linhasSelecionadas.primeiraLinha.join(", ")],
         ["Segunda", linhasSelecionadas.segundaLinhaIndex, linhasSelecionadas.choquesSegunda, linhasSelecionadas.segundaLinha.join(", ")]
     ];
@@ -251,7 +251,7 @@ function exibirResultadoTrocas(parOriginal, parModificado, intervalosTrocados, c
         cabecalho.appendChild(th);
     });
     tabela.appendChild(cabecalho);
-    ['Primeira Linha', 'Segunda Linha'].forEach((label, i) => {
+    ['Primeira Época', 'Segunda Época'].forEach((label, i) => {
         const tr = document.createElement('tr');
         const tdLabel = document.createElement('td');
         tdLabel.textContent = label;
@@ -289,7 +289,7 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
     tabelaOrdenacao.style.width = '100%';
     
     const cabecalhoOrdenacao = document.createElement('tr');
-    ['Posição', 'Linha', 'Choques', 'Valores'].forEach(texto => {
+    ['Posição', 'Época', 'Choques', 'Valores'].forEach(texto => {
         const th = document.createElement('th');
         th.textContent = texto;
         cabecalhoOrdenacao.appendChild(th);
@@ -300,7 +300,7 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
         const tr = document.createElement('tr');
         [`${index + 1}º`, linha.linhaIndex, linha.choques, linha.valores.substring(0, 80) + '...'].forEach((texto, i) => {
             const td = document.createElement('td');
-            if (i === 3) td.setAttribute('data-valores', linha.valores); // Salva todos os valores
+            if (i === 3) td.setAttribute('data-valores', linha.valores);
             td.textContent = texto;
             tr.appendChild(td);
         });
@@ -311,17 +311,14 @@ function exibirOrdenacaoFinal(linhasOrdenadas, containerId) {
     container.appendChild(divOrdenacao);
 }
 
-// Função para rolar até o elemento alvo
 function scrollToSection(selector) {
     const el = document.querySelector(selector);
     if (el) {
-        // Compensa altura do botão fixo (ex: 80px)
         const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
         window.scrollTo({ top: y, behavior: 'smooth' });
     }
 }
 
-// Adiciona IDs para navegação se não existirem
 function ensureSectionIds() {
     const grade = document.getElementById('grade-container');
     if (grade && !grade.id.includes('section')) grade.setAttribute('data-section', 'grade');
@@ -331,7 +328,6 @@ function ensureSectionIds() {
     if (choques && !choques.id.includes('section')) choques.setAttribute('data-section', 'choques');
     choques.parentElement.id = 'section-choques';
 
-    // Cria containers para as outras seções se não existirem
     let ordenacao = document.getElementById('section-ordenacao');
     if (!ordenacao) {
         ordenacao = document.createElement('div');
@@ -350,7 +346,6 @@ function ensureSectionIds() {
 
 window.addEventListener('DOMContentLoaded', () => {
     ensureSectionIds();
-    // Corrige para rolar até o topo do container correto
     document.querySelector('.btn-grade').onclick = () => scrollToSection('#grade-container');
     document.querySelector('.btn-choques').onclick = () => scrollToSection('#choques-container');
     document.querySelector('.btn-ordenacao').onclick = () => scrollToSection('#section-ordenacao');
@@ -364,9 +359,7 @@ btnEspecial.title = 'Botão Especial';
 btnEspecial.innerHTML = 'GERAR GRADE HORÁRIA';
 document.body.appendChild(btnEspecial);
 
-// Função para garantir que os títulos de ordenação e seleção sejam criados após o conteúdo dinâmico
 function garantirTitulosDinamicos() {
-    // ORDENAÇÃO
     let ordenacaoDiv = document.getElementById('section-ordenacao');
     if (ordenacaoDiv && !ordenacaoDiv.querySelector('h2')) {
         let h2Ordenacao = document.createElement('h2');
@@ -374,11 +367,10 @@ function garantirTitulosDinamicos() {
         h2Ordenacao.id = 'titulo-ordenacao';
         ordenacaoDiv.prepend(h2Ordenacao);
     }
-    // SELEÇÃO
     let selecaoDiv = document.getElementById('section-selecao');
     if (selecaoDiv && !selecaoDiv.querySelector('h2')) {
         let h2Selecao = document.createElement('h2');
-        h2Selecao.textContent = 'SELEÇÃO ALEATÓRIA DE 5 PARES';
+        h2Selecao.textContent = 'SELEÇÃO ALEATÓRIA E MUTAÇÃO';
         h2Selecao.id = 'titulo-selecao';
         selecaoDiv.prepend(h2Selecao);
     }
@@ -387,7 +379,6 @@ function garantirTitulosDinamicos() {
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('grade-container').style.display = 'none';
     document.getElementById('choques-container').style.display = 'none';
-    // Garante que os containers de ordenação e seleção existam
     let ordenacaoDiv = document.getElementById('section-ordenacao');
     if (!ordenacaoDiv) {
         ordenacaoDiv = document.createElement('div');
@@ -409,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
     selecaoContainer.id = 'selecao-container';
     selecaoContainer.style.display = 'none';
     document.querySelector('.container').appendChild(selecaoContainer);
-    const numLinhas = parseInt(prompt("Informe quantas linhas a grade horária terá:"));
+    const numLinhas = parseInt(prompt("Informe quantas épocas a grade horária terá:"));
     
     if (!isNaN(numLinhas) && numLinhas > 0) {
         document.getElementById('grade-container').style.display = 'block';
@@ -419,28 +410,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const { gradeOrdenada, choquesPorLinhaOrdenados, matrizChoquesOrdenada } = ordenarLinhasPorChoques(minhaGrade);
         exibirGradeNoHTML(gradeOrdenada, 'grade-container', matrizChoquesOrdenada);
         exibirContagemChoques(choquesPorLinhaOrdenados, 'choques-container');
-        // ORDENAÇÃO POR CHOQUES APOS MUTAÇÃO
-        if (ordenacaoDiv) {
-            ordenacaoDiv.innerHTML = '';
-            // Exibe a ordenação das linhas originais (sem mutação)
-            const { gradeOrdenada, choquesPorLinhaOrdenados } = ordenarLinhasPorChoques(minhaGrade);
-            const linhasOrdenadas = gradeOrdenada.slice(1).map((linha, idx) => ({
-                linha,
-                linhaIndex: idx + 1,
-                choques: choquesPorLinhaOrdenados[idx],
-                valores: linha.join(', ')
-            }));
-            linhasOrdenadas.sort((a, b) => a.choques - b.choques);
-            exibirOrdenacaoFinal(linhasOrdenadas, 'section-ordenacao');
-        }
-        // SELEÇÃO ALEATÓRIA DE 5 PARES
+        const linhasMutadas = [];
         if (selecaoDiv) {
             selecaoDiv.innerHTML = '';
-            const numPares = 5;
+            const numPares = Math.floor(numLinhas / 2);
             const tituloSelecao = document.createElement('h2');
-            tituloSelecao.textContent = 'SELEÇÃO ALEATÓRIA DE 5 PARES';
+            tituloSelecao.textContent = `SELEÇÃO ALEATÓRIA DE ${numPares} PARES (${numLinhas} ÉPOCAS)`;
             tituloSelecao.id = 'titulo-selecao';
             selecaoDiv.appendChild(tituloSelecao);
+            
             for (let i = 0; i < numPares; i++) {
                 const linhasSelecionadas = selecionarLinhasAleatorias(minhaGrade, ordenarLinhasPorChoques(minhaGrade).choquesPorLinhaOrdenados);
                 const matrizSelecao = criarMatrizSelecao(linhasSelecionadas);
@@ -462,25 +440,61 @@ document.addEventListener('DOMContentLoaded', function() {
                     choquesSegunda: choquesPorLinha[1]
                 };
                 exibirResultadoTrocas(linhasSelecionadas, parModificado, intervalosTrocados, divPar);
+                
+                const gradeTemp1 = [minhaGrade[0], novaLinha1];
+                const { matrizChoques: choques1 } = verificarChoquesHorario(gradeTemp1);
+                const gradeTemp2 = [minhaGrade[0], novaLinha2];
+                const { matrizChoques: choques2 } = verificarChoquesHorario(gradeTemp2);
+                
+                linhasMutadas.push({
+                    linha: novaLinha1,
+                    linhaIndex: `Par ${i + 1} - Época 1`,
+                    choques: choquesPorLinha[0],
+                    choquesDetalhados: choques1[0] || []
+                });
+                linhasMutadas.push({
+                    linha: novaLinha2,
+                    linhaIndex: `Par ${i + 1} - Época 2`,
+                    choques: choquesPorLinha[1],
+                    choquesDetalhados: choques2[0] || []
+                });
             }
         }
+        
+        if (ordenacaoDiv) {
+            ordenacaoDiv.innerHTML = '';
+            linhasMutadas.sort((a, b) => a.choques - b.choques);
+            const linhasOrdenadas = linhasMutadas.map(item => ({
+                linha: item.linha,
+                linhaIndex: item.linhaIndex,
+                choques: item.choques,
+                valores: item.linha.join(', '),
+                choquesDetalhados: item.choquesDetalhados
+            }));
+            exibirOrdenacaoFinal(linhasOrdenadas, 'section-ordenacao');
+        }
     } else {
-        alert('Por favor, insira um número válido de linhas.');
+        alert('Por favor, insira um número válido de épocas.');
         location.reload();
     }
 });
 
 // Evento do botão especial
 btnEspecial.onclick = function() {
-    // Busca a primeira colocação da ordenação de forma robusta
     let primeiraLinha = null;
     let choquesArray = [];
     let choques = 0;
-    // Procura na última ordenacao exibida
+    
     if (window.ultimaOrdenacaoLinhas && window.ultimaOrdenacaoLinhas[0]) {
         primeiraLinha = window.ultimaOrdenacaoLinhas[0].linha;
         choquesArray = window.ultimaOrdenacaoLinhas[0].choquesDetalhados || [];
         choques = window.ultimaOrdenacaoLinhas[0].choques || 0;
+        
+        if (!choquesArray || choquesArray.length === 0) {
+            const gradeTemp = [Array.from({length: 100}, (_, i) => `P${Math.floor(i/20)+1}-H${(i%20)+1}`), primeiraLinha];
+            const { matrizChoques } = verificarChoquesHorario(gradeTemp);
+            choquesArray = matrizChoques[0] || [];
+        }
     } else {
         const ordenacaoDiv = document.getElementById('section-ordenacao');
         if (ordenacaoDiv) {
@@ -493,11 +507,17 @@ btnEspecial.onclick = function() {
                         let valores = tds[3].getAttribute('data-valores') || tds[3].textContent;
                         valores = valores.replace('...', '').split(',');
                         primeiraLinha = valores.map(v => v.trim());
+                        choques = parseInt(tds[2].textContent) || 0;
+                        
+                        const gradeTemp = [Array.from({length: 100}, (_, i) => `P${Math.floor(i/20)+1}-H${(i%20)+1}`), primeiraLinha];
+                        const { matrizChoques } = verificarChoquesHorario(gradeTemp);
+                        choquesArray = matrizChoques[0] || [];
                     }
                 }
             }
         }
     }
+    
     if (primeiraLinha && primeiraLinha.length >= 20) {
         exibirHorarioPrimeiroOrdenado(primeiraLinha, choquesArray, choques);
     } else {
@@ -505,13 +525,10 @@ btnEspecial.onclick = function() {
     }
 };
 
-// Função para criar e exibir o horário da primeira colocação
 function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
-    // Remove modal antigo se existir
     const antigo = document.getElementById('modal-horario-especial');
     if (antigo) antigo.remove();
 
-    // Cria overlay
     const overlay = document.createElement('div');
     overlay.id = 'modal-horario-especial';
     overlay.style.position = 'fixed';
@@ -525,72 +542,112 @@ function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
     overlay.style.justifyContent = 'center';
     overlay.style.zIndex = 3000;
 
-    // Modal box
     const box = document.createElement('div');
     box.style.background = '#fff';
     box.style.borderRadius = '16px';
     box.style.padding = '32px 24px 24px 24px';
     box.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
-    box.style.minWidth = '340px';
-    box.style.maxWidth = '90vw';
+    box.style.minWidth = '900px';
+    box.style.maxWidth = '95vw';
     box.style.maxHeight = '90vh';
     box.style.overflow = 'auto';
 
-    // Título
     const titulo = document.createElement('h2');
     titulo.textContent = `Horário - tivemos ${choques} choques`;
     titulo.style.textAlign = 'center';
+    titulo.style.marginBottom = '20px';
     box.appendChild(titulo);
 
-    // Tabela de horários
-    const tabela = document.createElement('table');
-    tabela.style.margin = '0 auto';
-    tabela.style.borderCollapse = 'collapse';
-    tabela.style.fontSize = '1em';
-    tabela.style.background = '#f8f9fa';
-    tabela.style.borderRadius = '8px';
-    tabela.style.overflow = 'hidden';
+    const containerPeriodos = document.createElement('div');
+    containerPeriodos.style.display = 'grid';
+    containerPeriodos.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+    containerPeriodos.style.gap = '20px';
+    containerPeriodos.style.marginBottom = '20px';
 
-    // Cabeçalho
+    const coresPeriodos = ['#ff9ff3', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd'];
     const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
-    const thead = document.createElement('thead');
-    const trHead = document.createElement('tr');
-    trHead.appendChild(document.createElement('th'));
-    dias.forEach(dia => {
-        const th = document.createElement('th');
-        th.textContent = dia;
-        th.style.padding = '8px 16px';
-        th.style.background = '#34495e';
-        th.style.color = '#fff';
-        trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
-    tabela.appendChild(thead);
 
-    // Corpo: 4 horários por dia (linhas)
-    for (let h = 0; h < 4; h++) {
-        const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        th.textContent = `Horário ${h+1}`;
-        th.style.background = '#eaeaea';
-        tr.appendChild(th);
-        for (let d = 0; d < 5; d++) {
-            const td = document.createElement('td');
-            const idx = d + h*5;
-            td.textContent = linha[idx] || '-';
-            td.style.padding = '8px 12px';
-            td.style.border = '1px solid #ddd';
-            // Destaca em vermelho claro se houver choque
-            if (choquesArray && choquesArray[idx]) {
-                td.style.background = '#ffcccc';
+    for (let periodo = 1; periodo <= 5; periodo++) {
+        const divPeriodo = document.createElement('div');
+        divPeriodo.style.border = '2px solid ' + coresPeriodos[periodo - 1];
+        divPeriodo.style.borderRadius = '8px';
+        divPeriodo.style.overflow = 'hidden';
+
+        const tituloPeriodo = document.createElement('h3');
+        tituloPeriodo.textContent = `Período ${periodo}`;
+        tituloPeriodo.style.background = coresPeriodos[periodo - 1];
+        tituloPeriodo.style.color = periodo === 5 ? '#fff' : '#2c3e50';
+        tituloPeriodo.style.margin = '0';
+        tituloPeriodo.style.padding = '10px';
+        tituloPeriodo.style.textAlign = 'center';
+        tituloPeriodo.style.fontSize = '1.1em';
+        divPeriodo.appendChild(tituloPeriodo);
+
+        const tabela = document.createElement('table');
+        tabela.style.width = '100%';
+        tabela.style.borderCollapse = 'collapse';
+        tabela.style.background = '#f8f9fa';
+
+        const thead = document.createElement('thead');
+        const trHead = document.createElement('tr');
+        
+        const thVazio = document.createElement('th');
+        thVazio.style.padding = '8px 12px';
+        thVazio.style.background = '#34495e';
+        thVazio.style.color = '#fff';
+        thVazio.style.border = '1px solid #ddd';
+        trHead.appendChild(thVazio);
+        
+        dias.forEach(dia => {
+            const th = document.createElement('th');
+            th.textContent = dia;
+            th.style.padding = '8px 12px';
+            th.style.background = '#34495e';
+            th.style.color = '#fff';
+            th.style.border = '1px solid #ddd';
+            th.style.textAlign = 'center';
+            th.style.fontSize = '0.9em';
+            trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+        tabela.appendChild(thead);
+
+        for (let h = 0; h < 4; h++) {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            th.textContent = `H${h + 1}`;
+            th.style.background = '#eaeaea';
+            th.style.padding = '8px 12px';
+            th.style.border = '1px solid #ddd';
+            th.style.fontSize = '0.9em';
+            tr.appendChild(th);
+            
+            for (let d = 0; d < 5; d++) {
+                const td = document.createElement('td');
+                const idx = (periodo - 1) * 20 + d + h * 5;
+                td.textContent = linha[idx] || '-';
+                td.style.padding = '8px 6px';
+                td.style.border = '1px solid #ddd';
+                td.style.textAlign = 'center';
+                td.style.fontSize = '0.8em';
+                
+                if (choquesArray && choquesArray[idx]) {
+                    td.style.background = '#ffcccc';
+                    td.style.fontWeight = 'bold';
+                } else {
+                    td.style.background = '#fff';
+                }
+                tr.appendChild(td);
             }
-            tr.appendChild(td);
+            tabela.appendChild(tr);
         }
-        tabela.appendChild(tr);
+        
+        divPeriodo.appendChild(tabela);
+        containerPeriodos.appendChild(divPeriodo);
     }
-    box.appendChild(tabela);
+    
+    box.appendChild(containerPeriodos);
 
-    // Botão fechar
     const btnFechar = document.createElement('button');
     btnFechar.textContent = 'Fechar';
     btnFechar.style.margin = '24px auto 0 auto';
