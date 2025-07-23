@@ -3,25 +3,156 @@ const disciplinas = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
 const professorDisciplinaMap = {};
 const constantesGeradas = {};
 
-function sortearProfessor() {
-    const indice = Math.floor(Math.random() * professores.length);
-    return professores[indice];
+// Organizar disciplinas por período
+const disciplinasPorPeriodo = {
+    1: ["01", "02", "03", "04", "05"],
+    2: ["06", "07", "08", "09", "10"],
+    3: ["11", "12", "13", "14", "15"],
+    4: ["16", "17", "18", "19", "20"],
+    5: ["21", "22", "23", "24", "25"]
+};
+
+// Mapeamento das disciplinas para seus nomes completos
+const nomesDisciplinas = {
+    "01": "EMPREENDEDORISMO",
+    "02": "FUNDAMENTOS",
+    "03": "LOGICA",
+    "04": "PROJ. WEBSITE",
+    "05": "SO",
+    "06": "ALGORITMOS",
+    "07": "FUNDAMENTOS BD",
+    "08": "JS BASICO",
+    "09": "POO",
+    "10": "PROJ MVC E SQL",
+    "11": "BD AVANCADO",
+    "12": "POO 2",
+    "13": "BACK END MONOLITICO",
+    "14": "PROJETO FRONT",
+    "15": "TESTES",
+    "16": "BD NOSQL",
+    "17": "IHC",
+    "18": "DISP. MOVEIS",
+    "19": "BACK END MICRO",
+    "20": "SIST DISTRIBUIDOS",
+    "21": "INT. COMPUTACIONAL",
+    "22": "LIBRAS",
+    "23": "MONOGRAFIA",
+    "24": "SEGURANÇA",
+    "25": "TOPICOS ESPECIAIS"
+};
+
+/**
+ * FUNÇÃO: Sortear professores aleatoriamente de uma lista
+ * PROPÓSITO: Implementa seleção aleatória para distribuição de professores nas disciplinas
+ * ENTRADA: lista de professores e quantidade a sortear
+ * SAÍDA: array com professores selecionados aleatoriamente
+ */
+function sortearProfessores(lista, quantidade) {
+    const copia = [...lista];
+    const selecionados = [];
+    for (let i = 0; i < quantidade && copia.length > 0; i++) {
+        const indice = Math.floor(Math.random() * copia.length);
+        selecionados.push(copia.splice(indice, 1)[0]);
+    }
+    return selecionados;
 }
 
-function sortearDisciplina() {
-    const indice = Math.floor(Math.random() * disciplinas.length);
-    return disciplinas[indice];
+/**
+ * FUNÇÃO: Embaralhar array usando algoritmo Fisher-Yates
+ * PROPÓSITO: Randomizar ordem das disciplinas para evitar padrões na associação professor-disciplina
+ * ENTRADA: array a ser embaralhado
+ * SAÍDA: novo array com elementos em ordem aleatória
+ */
+function embaralharArray(array) {
+    const copia = [...array];
+    for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
 }
 
-for (const disciplina of disciplinas) {
-    const professor = sortearProfessor();
-    const constanteNome = `${professor.toLowerCase()}_${disciplina}`;
-    const valorConcatenado = `${professor}-${disciplina}`;
-    constantesGeradas[constanteNome] = valorConcatenado;
-    professorDisciplinaMap[professor] = professorDisciplinaMap[professor] || [];
-    professorDisciplinaMap[professor].push(disciplina);
+// Criar pool de professores disponíveis
+let poolProfessores = [...professores];
+
+// Primeiro semestre: 1º, 3º, 5º períodos
+const periodosPrimeiroSemestre = [1, 3, 5];
+for (const periodo of periodosPrimeiroSemestre) {
+    const disciplinasDoPeriodo = disciplinasPorPeriodo[periodo];
+    
+    // Se não há professores suficientes no pool, reabastecê-lo
+    if (poolProfessores.length < 5) {
+        poolProfessores = [...professores];
+    }
+    
+    // Sortear 5 professores para este período
+    const professoresDoPeriodo = sortearProfessores(poolProfessores, 5);
+    
+    // Remover os professores sorteados do pool
+    professoresDoPeriodo.forEach(prof => {
+        const index = poolProfessores.indexOf(prof);
+        if (index > -1) {
+            poolProfessores.splice(index, 1);
+        }
+    });
+    
+    // Embaralhar as disciplinas do período
+    const disciplinasEmbaralhadas = embaralharArray(disciplinasDoPeriodo);
+    
+    // Associar cada disciplina com um professor
+    disciplinasEmbaralhadas.forEach((disciplina, index) => {
+        const professor = professoresDoPeriodo[index];
+        const constanteNome = `${professor.toLowerCase()}_${disciplina}`;
+        const valorConcatenado = `${professor}-${disciplina}`;
+        constantesGeradas[constanteNome] = valorConcatenado;
+        professorDisciplinaMap[professor] = professorDisciplinaMap[professor] || [];
+        professorDisciplinaMap[professor].push(disciplina);
+    });
 }
 
+// Zerar pool e recomeçar para o segundo semestre: 2º, 4º períodos
+poolProfessores = [...professores];
+const periodosSegundoSemestre = [2, 4];
+for (const periodo of periodosSegundoSemestre) {
+    const disciplinasDoPeriodo = disciplinasPorPeriodo[periodo];
+    
+    // Se não há professores suficientes no pool, reabastecê-lo
+    if (poolProfessores.length < 5) {
+        poolProfessores = [...professores];
+    }
+    
+    // Sortear 5 professores para este período
+    const professoresDoPeriodo = sortearProfessores(poolProfessores, 5);
+    
+    // Remover os professores sorteados do pool
+    professoresDoPeriodo.forEach(prof => {
+        const index = poolProfessores.indexOf(prof);
+        if (index > -1) {
+            poolProfessores.splice(index, 1);
+        }
+    });
+    
+    // Embaralhar as disciplinas do período
+    const disciplinasEmbaralhadas = embaralharArray(disciplinasDoPeriodo);
+    
+    // Associar cada disciplina com um professor
+    disciplinasEmbaralhadas.forEach((disciplina, index) => {
+        const professor = professoresDoPeriodo[index];
+        const constanteNome = `${professor.toLowerCase()}_${disciplina}`;
+        const valorConcatenado = `${professor}-${disciplina}`;
+        constantesGeradas[constanteNome] = valorConcatenado;
+        professorDisciplinaMap[professor] = professorDisciplinaMap[professor] || [];
+        professorDisciplinaMap[professor].push(disciplina);
+    });
+}
+
+/**
+ * FUNÇÃO: Criar matriz da grade horária - NÚCLEO DO ALGORITMO GENÉTICO
+ * PROPÓSITO: Gera população inicial de indivíduos (épocas/cromossomos) para o algoritmo genético
+ * ENTRADA: número de épocas (indivíduos) a gerar
+ * SAÍDA: matriz onde cada linha é um indivíduo com 100 genes (5 períodos × 20 horários)
+ * LÓGICA: Cada gene contém uma combinação professor-disciplina respeitando período correto
+ */
 function criarMatrizGradeHoraria(numLinhas) {
     const numPeriodos = 5;
     const horariosPorPeriodo = 20;
@@ -34,17 +165,44 @@ function criarMatrizGradeHoraria(numLinhas) {
     });
     gradeHoraria.push(linhaHorarios);
 
+    // Separar as disciplinas por período
+    const disciplinasPorPeriodoGeradas = {};
+    for (let p = 1; p <= 5; p++) {
+        disciplinasPorPeriodoGeradas[p] = [];
+        disciplinasPorPeriodo[p].forEach(disciplina => {
+            // Encontrar todas as combinações professor-disciplina deste período
+            Object.values(constantesGeradas).forEach(combo => {
+                if (combo.endsWith('-' + disciplina)) {
+                    disciplinasPorPeriodoGeradas[p].push(combo);
+                }
+            });
+        });
+    }
+
     for (let i = 0; i < numLinhas; i++) {
         const linha = Array(numTotalHorarios).fill('');
+        
         for (let j = 0; j < numTotalHorarios; j++) {
-            const professorDisciplina = Object.values(constantesGeradas)[Math.floor(Math.random() * Object.values(constantesGeradas).length)];
-            linha[j] = professorDisciplina;
+            // Determinar qual período esta posição pertence
+            const periodo = Math.floor(j / horariosPorPeriodo) + 1;
+            
+            // Escolher uma disciplina aleatória do período correspondente
+            const disciplinasDisponiveis = disciplinasPorPeriodoGeradas[periodo];
+            if (disciplinasDisponiveis && disciplinasDisponiveis.length > 0) {
+                const professorDisciplina = disciplinasDisponiveis[Math.floor(Math.random() * disciplinasDisponiveis.length)];
+                linha[j] = professorDisciplina;
+            }
         }
         gradeHoraria.push(linha);
     }
     return gradeHoraria;
 }
 
+/**
+ * FUNÇÃO: Verificar choques de horário - AVALIAÇÃO DO FITNESS
+ * PROPÓSITO: Calcula conflitos de mesmo professor em horários simultâneos por semestre
+ * LÓGICA: 1 choque por slot temporal independente de repetições
+ */
 function verificarChoquesHorario(grade) {
     const numLinhas = grade.length;
     const numHorariosPorPeriodo = 20;
@@ -54,27 +212,53 @@ function verificarChoquesHorario(grade) {
     const diasDaSemana = [0, 1, 2, 3, 4];
     const horariosDoDia = [0, 1, 2, 3];
 
+    // Definir grupos de períodos por semestre
+    const gruposSemestre = [
+        [0, 2, 4], // 1º semestre: Períodos 1, 3, 5 (índices 0, 2, 4)
+        [1, 3]     // 2º semestre: Períodos 2, 4 (índices 1, 3)
+    ];
+
     for (let i = 1; i < numLinhas; i++) {
         const linhaChoques = Array(numHorariosPorPeriodo * numPeriodos).fill(false);
-        const professoresAlocadosPorDia = {};
-
-        for (const dia of diasDaSemana) {
-            professoresAlocadosPorDia[dia] = {};
-            for (let periodo = 0; periodo < numPeriodos; periodo++) {
+        
+        // Para cada grupo de semestre, verificar choques apenas dentro do grupo
+        for (const grupoSemestre of gruposSemestre) {
+            // Para cada combinação de dia + horário
+            for (const dia of diasDaSemana) {
                 for (let horarioIndex = 0; horarioIndex < horariosDoDia.length; horarioIndex++) {
-                    const coluna = periodo * numHorariosPorPeriodo + dia + horarioIndex * 5;
-                    if (coluna < numHorariosPorPeriodo * numPeriodos) {
-                        const professorDisciplina = grade[i][coluna];
-                        if (professorDisciplina) {
-                            const professor = professorDisciplina.split('-')[0];
-                            const horarioDoDia = horariosDoDia[horarioIndex];
-                            if (professoresAlocadosPorDia[dia][horarioDoDia]) {
-                                if (professoresAlocadosPorDia[dia][horarioDoDia] === professor) {
+                    const professoresNoMesmoSlot = [];
+                    const posicoesDoSlot = [];
+                    let jaContouChoqueNesteSlot = false;
+                    
+                    // Verificar apenas os períodos deste semestre para este dia + horário específico
+                    for (const periodo of grupoSemestre) {
+                        const coluna = periodo * numHorariosPorPeriodo + dia + horarioIndex * 5;
+                        if (coluna < numHorariosPorPeriodo * numPeriodos) {
+                            const professorDisciplina = grade[i][coluna];
+                            if (professorDisciplina) {
+                                const professor = professorDisciplina.split('-')[0];
+                                
+                                // Verificar se este professor já apareceu neste mesmo dia + horário no semestre
+                                if (professoresNoMesmoSlot.includes(professor)) {
+                                    // Marcar como choque todas as posições deste professor no mesmo slot
                                     linhaChoques[coluna] = true;
-                                    choquesPorLinha[i - 1]++;
+                                    
+                                    // Marcar também todas as posições anteriores deste professor no mesmo slot
+                                    for (let j = 0; j < professoresNoMesmoSlot.length; j++) {
+                                        if (professoresNoMesmoSlot[j] === professor) {
+                                            linhaChoques[posicoesDoSlot[j]] = true;
+                                        }
+                                    }
+                                    
+                                    // Contar apenas 1 choque por slot (mesmo dia + horário), independente de quantas repetições
+                                    if (!jaContouChoqueNesteSlot) {
+                                        choquesPorLinha[i - 1]++;
+                                        jaContouChoqueNesteSlot = true;
+                                    }
+                                } else {
+                                    professoresNoMesmoSlot.push(professor);
+                                    posicoesDoSlot.push(coluna);
                                 }
-                            } else {
-                                professoresAlocadosPorDia[dia][horarioDoDia] = professor;
                             }
                         }
                     }
@@ -525,6 +709,11 @@ btnEspecial.onclick = function() {
     }
 };
 
+/**
+ * FUNÇÃO: Exibir horário da primeira colocação - APRESENTAÇÃO DO RESULTADO
+ * PROPÓSITO: Mostra grade final formatada com professores e disciplinas por período
+ * LAYOUT: 2 períodos por linha, cores diferenciadas, nomes completos das disciplinas
+ */
 function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
     const antigo = document.getElementById('modal-horario-especial');
     if (antigo) antigo.remove();
@@ -545,24 +734,27 @@ function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
     const box = document.createElement('div');
     box.style.background = '#fff';
     box.style.borderRadius = '16px';
-    box.style.padding = '32px 24px 24px 24px';
+    box.style.padding = '8px 12px 8px 12px';
     box.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
-    box.style.minWidth = '900px';
-    box.style.maxWidth = '95vw';
-    box.style.maxHeight = '90vh';
+    box.style.minWidth = '1400px';
+    box.style.maxWidth = '98vw';
+    box.style.maxHeight = '95vh';
     box.style.overflow = 'auto';
 
     const titulo = document.createElement('h2');
-    titulo.textContent = `Horário - tivemos ${choques} choques`;
+    titulo.textContent = `Horário - Tivemos ${choques} ${choques === 1 ? 'choque' : 'choques'}`;
     titulo.style.textAlign = 'center';
-    titulo.style.marginBottom = '20px';
+    titulo.style.marginBottom = '8px';
+    titulo.style.fontSize = '1.4em';
+    titulo.style.color = '#2c3e50';
+    titulo.style.marginTop = '0px';
     box.appendChild(titulo);
 
     const containerPeriodos = document.createElement('div');
     containerPeriodos.style.display = 'grid';
-    containerPeriodos.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
-    containerPeriodos.style.gap = '20px';
-    containerPeriodos.style.marginBottom = '20px';
+    containerPeriodos.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    containerPeriodos.style.gap = '8px';
+    containerPeriodos.style.marginBottom = '8px';
 
     const coresPeriodos = ['#ff9ff3', '#feca57', '#1dd1a1', '#54a0ff', '#5f27cd'];
     const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
@@ -578,35 +770,39 @@ function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
         tituloPeriodo.style.background = coresPeriodos[periodo - 1];
         tituloPeriodo.style.color = periodo === 5 ? '#fff' : '#2c3e50';
         tituloPeriodo.style.margin = '0';
-        tituloPeriodo.style.padding = '10px';
+        tituloPeriodo.style.padding = '4px';
         tituloPeriodo.style.textAlign = 'center';
-        tituloPeriodo.style.fontSize = '1.1em';
+        tituloPeriodo.style.fontSize = '1em';
         divPeriodo.appendChild(tituloPeriodo);
 
         const tabela = document.createElement('table');
         tabela.style.width = '100%';
         tabela.style.borderCollapse = 'collapse';
         tabela.style.background = '#f8f9fa';
-
+        tabela.style.tableLayout = 'fixed';
+        
         const thead = document.createElement('thead');
         const trHead = document.createElement('tr');
         
         const thVazio = document.createElement('th');
-        thVazio.style.padding = '8px 12px';
+        thVazio.style.padding = '4px 2px';
         thVazio.style.background = '#34495e';
         thVazio.style.color = '#fff';
         thVazio.style.border = '1px solid #ddd';
+        thVazio.style.width = '50px';
+        thVazio.style.fontSize = '0.8em';
         trHead.appendChild(thVazio);
         
         dias.forEach(dia => {
             const th = document.createElement('th');
             th.textContent = dia;
-            th.style.padding = '8px 12px';
+            th.style.padding = '4px 2px';
             th.style.background = '#34495e';
             th.style.color = '#fff';
             th.style.border = '1px solid #ddd';
             th.style.textAlign = 'center';
-            th.style.fontSize = '0.9em';
+            th.style.fontSize = '0.8em';
+            th.style.width = '120px';
             trHead.appendChild(th);
         });
         thead.appendChild(trHead);
@@ -617,19 +813,72 @@ function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
             const th = document.createElement('th');
             th.textContent = `H${h + 1}`;
             th.style.background = '#eaeaea';
-            th.style.padding = '8px 12px';
+            th.style.padding = '2px';
             th.style.border = '1px solid #ddd';
-            th.style.fontSize = '0.9em';
+            th.style.fontSize = '0.8em';
+            th.style.textAlign = 'center';
+            th.style.verticalAlign = 'middle';
+            th.style.height = '28px';
             tr.appendChild(th);
             
             for (let d = 0; d < 5; d++) {
                 const td = document.createElement('td');
+                // Corrigir o cálculo do índice: período base + dia + (horário * 5 dias)
                 const idx = (periodo - 1) * 20 + d + h * 5;
-                td.textContent = linha[idx] || '-';
-                td.style.padding = '8px 6px';
+                let conteudoCelula = linha[idx] || '-';
+                
+                // Criar estrutura com professor em cima e disciplina embaixo
+                if (conteudoCelula !== '-' && conteudoCelula.includes('-')) {
+                    const [professor, disciplina] = conteudoCelula.split('-');
+                    const nomeDisciplina = nomesDisciplinas[disciplina] || disciplina;
+                    
+                    // Criar div container para professor e disciplina
+                    const container = document.createElement('div');
+                    container.style.display = 'flex';
+                    container.style.flexDirection = 'column';
+                    container.style.alignItems = 'center';
+                    container.style.justifyContent = 'center';
+                    container.style.height = '100%';
+                    container.style.lineHeight = '1';
+                    container.style.padding = '0px';
+                    
+                    // Professor em cima
+                    const divProfessor = document.createElement('div');
+                    divProfessor.textContent = professor;
+                    divProfessor.style.fontWeight = 'bold';
+                    divProfessor.style.fontSize = '1em';
+                    divProfessor.style.color = '#2c3e50';
+                    divProfessor.style.marginBottom = '0px';
+                    
+                    // Disciplina embaixo
+                    const divDisciplina = document.createElement('div');
+                    divDisciplina.textContent = nomeDisciplina;
+                    divDisciplina.style.fontSize = '0.65em';
+                    divDisciplina.style.color = '#34495e';
+                    divDisciplina.style.wordWrap = 'break-word';
+                    divDisciplina.style.hyphens = 'auto';
+                    divDisciplina.style.textAlign = 'center';
+                    divDisciplina.style.maxWidth = '100%';
+                    divDisciplina.style.lineHeight = '1';
+                    
+                    container.appendChild(divProfessor);
+                    container.appendChild(divDisciplina);
+                    td.appendChild(container);
+                } else {
+                    td.textContent = conteudoCelula;
+                    td.style.textAlign = 'center';
+                    td.style.verticalAlign = 'middle';
+                    td.style.fontSize = '0.7em';
+                }
+                
+                td.style.padding = '0px 1px';
                 td.style.border = '1px solid #ddd';
                 td.style.textAlign = 'center';
-                td.style.fontSize = '0.8em';
+                td.style.verticalAlign = 'middle';
+                td.style.minWidth = '110px';
+                td.style.maxWidth = '120px';
+                td.style.height = '28px';
+                td.style.overflow = 'hidden';
                 
                 if (choquesArray && choquesArray[idx]) {
                     td.style.background = '#ffcccc';
@@ -650,7 +899,7 @@ function exibirHorarioPrimeiroOrdenado(linha, choquesArray, choques) {
 
     const btnFechar = document.createElement('button');
     btnFechar.textContent = 'Fechar';
-    btnFechar.style.margin = '24px auto 0 auto';
+    btnFechar.style.margin = '12px auto 0 auto';
     btnFechar.style.display = 'block';
     btnFechar.style.background = '#ff6b6b';
     btnFechar.style.color = '#fff';
